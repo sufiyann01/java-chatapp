@@ -1,14 +1,6 @@
 import java.net.*;
 import java.io.*;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JTextArea;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
