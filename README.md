@@ -6,13 +6,11 @@ A real-time two-way chat application built with **Java Sockets**, **Multithreadi
 
 ## 📸 Preview
 
-> _Replace with actual screenshots after running the app._
-
 | Server Window | Client Window |
 |---|---|
-| ![server](<img width="783" height="755" alt="Screenshot 2026-03-18 224904" src="https://github.com/user-attachments/assets/cbb42616-2242-4317-80d9-f0efe8c6b722" />
-) | ![client](<img width="800" height="798" alt="image" src="https://github.com/user-attachments/assets/4424acc2-9b88-4336-bb2a-85aa1e58dafa" />
-) |
+| ![server]<img width="783" height="755" alt="Screenshot 2026-03-18 224904" src="https://github.com/user-attachments/assets/cbb42616-2242-4317-80d9-f0efe8c6b722" />
+ | ![client]<img width="800" height="798" alt="image" src="https://github.com/user-attachments/assets/4424acc2-9b88-4336-bb2a-85aa1e58dafa" />
+|
 
 ---
 
