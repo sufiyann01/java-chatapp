@@ -181,16 +181,14 @@ Pull requests are welcome!
 
 ---
 
-## 📄 License
 
-This project is licensed under the **MIT License**.
 
 ---
 
 ## 👨‍💻 Author
 
 **Your Name**
-- GitHub: [@your-username](https://github.com/sufiyann01)
+- GitHub: [@sufiyann01](https://github.com/sufiyann01)
 
 ---
 
