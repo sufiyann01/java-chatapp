@@ -1,39 +1,38 @@
-# 💬 JavaChat — Multi-Client Chat Application
+# 💬 JavaChat — Socket-Based Chat Application
 
-A real-time, multi-client chat application built with **Java Sockets**, **Multithreading**, and **Java Swing** GUI. Supports multiple users chatting simultaneously with a clean graphical interface.
+A real-time two-way chat application built with **Java Sockets**, **Multithreading**, and **Java Swing**. A Server and Client communicate over a local network with a clean graphical interface — messages sent instantly, displayed live.
 
 ---
 
-## 📸 Screenshots
+## 📸 Preview
 
-> _Add your screenshots here after running the app._
+> _Replace with actual screenshots after running the app._
 
-| Login Screen | Chat Window | Server Console |
-|---|---|---|
-| ![login](#) | ![chat](#) | ![server](#) |
+| Server Window | Client Window |
+|---|---|
+| ![server](#) | ![client](#) |
 
 ---
 
 ## 🚀 Features
 
-- **Real-time messaging** — instant message delivery between connected clients
-- **Multi-client support** — multiple users can chat simultaneously via multithreading
-- **Java Swing GUI** — clean, responsive graphical interface for the chat client
-- **Username system** — users set a display name on login
-- **Broadcast messages** — server relays messages to all connected clients
-- **Server console** — live log of connected clients and activity
-- **Graceful disconnect** — notifies users when someone leaves the chat
+- **Two-way real-time chat** — Server and Client can send and receive messages instantly
+- **Java Swing GUI** — graphical chat window with scrollable message area
+- **Multithreaded reading** — a background thread handles incoming messages without freezing the UI
+- **Enter key to send** — press Enter in the input field to send a message
+- **Exit handling** — typing `exit` terminates the connection and disables the input
+- **Custom avatar/icon** — loads `IMAGE.png` as a display icon in the heading
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
+| Component | Technology |
 |---|---|
 | Language | Java 8+ |
-| Networking | Java Sockets (`java.net`) |
-| Concurrency | Multithreading (`java.lang.Thread`) |
-| GUI | Java Swing (`javax.swing`) |
+| Networking | `java.net.Socket`, `java.net.ServerSocket` |
+| Concurrency | `java.lang.Thread` (Runnable lambda) |
+| GUI | `javax.swing` — `JFrame`, `JTextArea`, `JTextField`, `JScrollPane` |
 | I/O | `BufferedReader`, `PrintWriter` |
 
 ---
@@ -42,16 +41,10 @@ A real-time, multi-client chat application built with **Java Sockets**, **Multit
 
 ```
 JavaChat/
-├── src/
-│   ├── server/
-│   │   ├── Server.java          # Main server — accepts client connections
-│   │   └── ClientHandler.java   # Thread per client — handles messaging
-│   ├── client/
-│   │   ├── Client.java          # Client networking logic
-│   │   └── ChatWindow.java      # Swing GUI — chat interface
-│   └── Main.java                # Entry point (optional launcher)
-├── README.md
-└── .gitignore
+├── Server.java       # Server — listens on port 7778, accepts one client
+├── Client.java       # Client — connects to server at 127.0.0.1:7778
+├── IMAGE.png         # Avatar/icon shown in the chat window heading
+└── README.md
 ```
 
 ---
@@ -59,22 +52,26 @@ JavaChat/
 ## ⚙️ How It Works
 
 ```
-┌─────────────┐        Socket         ┌──────────────────────┐
-│  Client 1   │ ◄────────────────────► │                      │
-│  (Swing UI) │                        │   Server             │
-└─────────────┘                        │   (Multi-threaded)   │
-                                       │                      │
-┌─────────────┐        Socket         │  ClientHandler × N   │
-│  Client 2   │ ◄────────────────────► │  (one thread/client) │
-│  (Swing UI) │                        │                      │
-└─────────────┘                        └──────────────────────┘
+┌──────────────────────┐                  ┌──────────────────────┐
+│      Server.java     │   Socket :7778   │      Client.java     │
+│                      │ ◄──────────────► │                      │
+│  ServerSocket(7778)  │                  │  Socket(127.0.0.1,   │
+│  accept() → Socket   │                  │          7778)       │
+│                      │                  │                      │
+│  startReading()      │  message text    │  startReading()      │
+│  [background thread] │ ◄──────────────► │  [background thread] │
+│                      │                  │                      │
+│  KeyListener →       │                  │  KeyListener →       │
+│  out.println(msg)    │ ──────────────►  │  out.println(msg)    │
+└──────────────────────┘                  └──────────────────────┘
 ```
 
-1. **Server** starts and listens on a port (default: `12345`)
-2. Each **Client** connects via a socket and enters a username
-3. Server spawns a new **`ClientHandler` thread** for each connection
-4. Messages from one client are **broadcast to all** connected clients
-5. The **Swing GUI** renders the chat in real time
+1. **`Server.java`** creates a `ServerSocket` on port `7778` and waits for a connection
+2. **`Client.java`** connects to `127.0.0.1:7778`
+3. Both sides set up `BufferedReader` (input) and `PrintWriter` (output) streams
+4. Each side calls **`startReading()`** — a background thread that continuously reads incoming messages and appends them to the `JTextArea`
+5. Sending uses a **`KeyListener`** on the `JTextField` — pressing Enter (keyCode `10`) reads the input, appends `"Me: ..."` locally, and writes to the socket stream
+6. Typing **`exit`** closes the connection, shows an error dialog, and disables the input field
 
 ---
 
@@ -82,103 +79,111 @@ JavaChat/
 
 ### Prerequisites
 
-- Java JDK 8 or higher
-- Any IDE (IntelliJ IDEA, Eclipse, VS Code) or terminal
+- Java JDK 8 or above
+- `IMAGE.png` placed in the **same directory** as the compiled `.class` files (used as the heading icon)
 
-### Clone the Repository
+---
 
-```bash
-git clone https://github.com/your-username/JavaChat.git
-cd JavaChat
-```
-
-### Compile
+### Step 1 — Compile
 
 ```bash
-javac -d out src/server/*.java src/client/*.java
+javac Server.java
+javac Client.java
 ```
 
-### Run the Server
+### Step 2 — Run the Server
 
 ```bash
-java -cp out server.Server
+java Server
 ```
 
-> Server starts listening on port `12345` by default.
+Console output:
+```
+server started...
+waiting for client....
+```
 
-### Run the Client(s)
-
-Open **multiple terminals** (or run from multiple machines):
+### Step 3 — Run the Client (in a new terminal)
 
 ```bash
-java -cp out client.Client
+java Client
 ```
 
-> Each client instance opens the Swing chat window. Enter your username and start chatting!
+Console output:
+```
+sending request to server
+connection done....
+reader started
+```
+
+Both Swing windows open. Type in the input field of either window and press **Enter** to chat.
 
 ---
 
 ## 🖥️ Usage
 
-1. Start the **server** first
-2. Launch one or more **client** windows
-3. Enter a **username** when prompted
-4. Type messages and hit **Send** or press **Enter**
-5. All connected users receive messages in real time
-6. Close the window to **disconnect**
-
----
-
-## 🧵 Multithreading Design
-
-| Thread | Purpose |
+| Action | How |
 |---|---|
-| `Server` main thread | Listens for new client connections in a loop |
-| `ClientHandler` thread | One per client — reads incoming messages and broadcasts |
-| Swing EDT | Handles all GUI updates (via `SwingUtilities.invokeLater`) |
-| Client listener thread | Reads incoming server messages without blocking the UI |
+| Send a message | Type in the bottom text field → press **Enter** |
+| End the chat | Type `exit` and press **Enter** |
+| Scroll chat history | Use the scroll bar in the message area |
+
+> ⚠️ When one side types `exit`, the other side sees a "connection terminated" dialog and the input is disabled.
 
 ---
 
-## 🔒 Configuration
+## 🧵 Threading Model
 
-Edit these constants in `Server.java` and `Client.java` to change defaults:
+| Thread | Where | Purpose |
+|---|---|---|
+| Main thread | `Server` / `Client` constructor | Sets up socket, GUI, event listeners |
+| Reader thread | `startReading()` | Runs in background, reads lines from socket continuously |
+| Swing EDT | `KeyListener` callback | Sends messages and updates UI on user input |
+
+The reader thread uses a lambda `Runnable` passed to `new Thread(r1).start()` — keeping the GUI responsive while waiting for incoming messages.
+
+---
+
+## ⚙️ Configuration
+
+To change the port or host, edit these lines:
 
 ```java
 // Server.java
-private static final int PORT = 12345;
+server = new ServerSocket(7778);
 
 // Client.java
-private static final String HOST = "localhost";
-private static final int PORT = 12345;
+socket = new Socket("127.0.0.1", 7778);
 ```
+
+To run across two machines on the same network, replace `"127.0.0.1"` in `Client.java` with the server machine's local IP (e.g., `"192.168.1.5"`).
 
 ---
 
-## 📌 Known Limitations
+## 📌 Limitations
 
-- No persistent chat history (messages are lost on server restart)
-- No private/direct messaging (all messages are broadcast)
-- No encryption (plain-text socket communication)
-- No authentication beyond a username
+- Supports only **one client** at a time (no multi-client broadcast)
+- No **chat history** — messages are lost when the app closes
+- No **encryption** — messages are sent as plain text
+- `IMAGE.png` must exist in the working directory or the icon silently fails to load
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome!
+Pull requests are welcome!
 
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
+1. Fork the repo
+2. Create a branch: `git checkout -b feature/your-feature`
+3. Commit: `git commit -m "Add your feature"`
+4. Push: `git push origin feature/your-feature`
 5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**.
 
 ---
 
@@ -189,4 +194,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ---
 
-> ⭐ If you found this project useful, consider giving it a star!
+> ⭐ Star this repo if it helped you learn Java networking!
